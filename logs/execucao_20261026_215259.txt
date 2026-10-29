@@ -1,0 +1,25 @@
+﻿[emendas_dotacao_exercicio_atual] extraidas 2501/2501 linhas em 1s
+[emendas_dotacao_exercicio_atual] staging 2501 linhas (qSize=2501); base: 0 inseridas/reativadas, 0 desativadas, 2501 ativas de 2501; 2s
+[emendas_impedimentos_tecnicos] extraidas 44/44 linhas em 1s
+[emendas_impedimentos_tecnicos] staging 44 linhas (qSize=44); base: 0 inseridas/reativadas, 0 desativadas, 44 ativas de 44; 1s
+[
+ {
+  "tabela": "emendas_dotacao_exercicio_atual",
+  "qsize": 2501,
+  "staging": 2501,
+  "inseridas": 0,
+  "desativadas": 0,
+  "ativas": 2501,
+  "segundos": 2
+ },
+ {
+  "tabela": "emendas_impedimentos_tecnicos",
+  "qsize": 44,
+  "staging": 44,
+  "inseridas": 0,
+  "desativadas": 0,
+  "ativas": 44,
+  "segundos": 1
+ }
+]
+total 3s; tabelas: 2; erros: 0

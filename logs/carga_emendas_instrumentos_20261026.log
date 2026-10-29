@@ -1,0 +1,14 @@
+[emendas_instrumentos] extraidas 326774/326774 linhas em 297s
+[emendas_instrumentos] staging 326774 linhas (qSize=326774); base: 326774 inseridas/reativadas, 0 desativadas, 326774 ativas de 326774; 332s
+[
+ {
+  "tabela": "emendas_instrumentos",
+  "qsize": 326774,
+  "staging": 326774,
+  "inseridas": 326774,
+  "desativadas": 0,
+  "ativas": 326774,
+  "segundos": 332
+ }
+]
+total 334s; erros: 0

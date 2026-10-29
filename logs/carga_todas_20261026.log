@@ -1,0 +1,338 @@
+[instrumentos_investimentos] extraidas 430884/430884 linhas em 220s
+[instrumentos_investimentos] staging 430884 linhas (qSize=430884); base: 0 inseridas/reativadas, 0 desativadas, 418537 ativas de 418537; 243s
+[instrumentos_empenhos] extraidas 473843/473843 linhas em 63s
+[instrumentos_empenhos] staging 473843 linhas (qSize=473843); base: 473843 inseridas/reativadas, 0 desativadas, 473843 ativas de 473843; 86s
+[instrumentos_cnes_propostas_faf] extraidas 502356/502356 linhas em 132s
+[instrumentos_cnes_propostas_faf] staging 502356 linhas (qSize=502356); base: 502356 inseridas/reativadas, 0 desativadas, 502356 ativas de 502356; 158s
+[instrumentos_cnes_detalhado] extraidas 540273/540273 linhas em 148s
+[instrumentos_cnes_detalhado] staging 540273 linhas (qSize=540273); base: 502356 inseridas/reativadas, 0 desativadas, 502356 ativas de 502356; 174s
+[emendas_instrumentos] extraidas 326774/326774 linhas em 310s
+Traceback (most recent call last):
+  File "C:\Users\sandro.resende\carga_fns\scripts\carga_todas.py", line 56, in <module>
+    resultado.append(main(app, oid, tabela))
+                     ~~~~^^^^^^^^^^^^^^^^^^
+  File "C:\Users\sandro.resende\carga_fns\scripts\carga_tabela.py", line 143, in main
+    cur.copy_expert(f"COPY {SCHEMA}.{tabela} ({lista}) FROM STDIN WITH (FORMAT csv)", buf)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+psycopg2.errors.DiskFull: ERRO:  não foi possível estender o arquivo "base/3933066/74684155" com FileFallocate(): No space left on device
+HINT:  Verifique o espaço em disco livre.
+CONTEXT:  COPY emendas_instrumentos, linha 159022
+
+[emendas_indicacao_exercicios_anteriores] extraidas 253232/253232 linhas em 131s
+[emendas_indicacao_exercicios_anteriores] staging 253232 linhas (qSize=253232); base: 253232 inseridas/reativadas, 0 desativadas, 253232 ativas de 253232; 149s
+[emendas_indicacao_exercicio_atual] extraidas 35040/35040 linhas em 12s
+[emendas_indicacao_exercicio_atual] staging 35040 linhas (qSize=35040); base: 35040 inseridas/reativadas, 0 desativadas, 35040 ativas de 35040; 14s
+[emendas_cadastro_propostas] extraidas 35040/35040 linhas em 14s
+[emendas_cadastro_propostas] staging 35040 linhas (qSize=35040); base: 35040 inseridas/reativadas, 0 desativadas, 35040 ativas de 35040; 16s
+[emendas_dotacao_exercicio_atual] extraidas 2501/2501 linhas em 2s
+[emendas_dotacao_exercicio_atual] staging 2501 linhas (qSize=2501); base: 2501 inseridas/reativadas, 0 desativadas, 2501 ativas de 2501; 2s
+[emendas_sidorc] extraidas 13072/13072 linhas em 3s
+[emendas_sidorc] staging 13072 linhas (qSize=13072); base: 13072 inseridas/reativadas, 0 desativadas, 13072 ativas de 13072; 4s
+[emendas_autores_comissao] extraidas 8055/8055 linhas em 2s
+[emendas_autores_comissao] staging 8055 linhas (qSize=8055); base: 8055 inseridas/reativadas, 0 desativadas, 8055 ativas de 8055; 3s
+[emendas_parlamentares_solicitantes] extraidas 6167/6167 linhas em 2s
+[emendas_parlamentares_solicitantes] staging 6167 linhas (qSize=6167); base: 6167 inseridas/reativadas, 0 desativadas, 6167 ativas de 6167; 3s
+[emendas_impedimentos_tecnicos] extraidas 44/44 linhas em 1s
+[emendas_impedimentos_tecnicos] staging 44 linhas (qSize=44); base: 44 inseridas/reativadas, 0 desativadas, 44 ativas de 44; 1s
+[emendas_cnes] extraidas 86285/86285 linhas em 12s
+[emendas_cnes] staging 86285 linhas (qSize=86285); base: 86285 inseridas/reativadas, 0 desativadas, 86285 ativas de 86285; 16s
+[obras_propostas] extraidas 46814/46814 linhas em 61s
+[obras_propostas] staging 46814 linhas (qSize=46814); base: 46813 inseridas/reativadas, 0 desativadas, 46813 ativas de 46813; 66s
+[obras_propostas_sismob_sispag] extraidas 46913/46913 linhas em 54s
+[obras_propostas_sismob_sispag] staging 46913 linhas (qSize=46913); base: 46913 inseridas/reativadas, 0 desativadas, 46913 ativas de 46913; 58s
+[obras_financeiro] extraidas 35791/35791 linhas em 21s
+[obras_financeiro] staging 35791 linhas (qSize=35791); base: 35791 inseridas/reativadas, 0 desativadas, 35791 ativas de 35791; 24s
+[obras_ciclo_datas] extraidas 46565/46565 linhas em 45s
+[obras_ciclo_datas] staging 46565 linhas (qSize=46565); base: 46565 inseridas/reativadas, 0 desativadas, 46565 ativas de 46565; 49s
+[obras_monitoramento] extraidas 134010/134010 linhas em 33s
+[obras_monitoramento] staging 134010 linhas (qSize=134010); base: 134010 inseridas/reativadas, 0 desativadas, 134010 ativas de 134010; 40s
+[obras_cancelados_devolucao] extraidas 10700/10700 linhas em 11s
+[obras_cancelados_devolucao] staging 10700 linhas (qSize=10700); base: 10700 inseridas/reativadas, 0 desativadas, 10700 ativas de 10700; 13s
+[obras_estabelecimentos] extraidas 13583/13583 linhas em 5s
+[obras_estabelecimentos] staging 13583 linhas (qSize=13583); base: 13583 inseridas/reativadas, 0 desativadas, 13583 ativas de 13583; 7s
+[obras_sisgru] extraidas 178863/178863 linhas em 169s
+[obras_sisgru] staging 178863 linhas (qSize=178863); base: 178640 inseridas/reativadas, 0 desativadas, 178640 ativas de 178640; 183s
+[obras_geolocalizacao] extraidas 46624/46624 linhas em 7s
+[obras_geolocalizacao] staging 46624 linhas (qSize=46624); base: 44297 inseridas/reativadas, 0 desativadas, 44297 ativas de 44297; 9s
+[novo_pac_propostas] extraidas 14592/14592 linhas em 5s
+[novo_pac_propostas] staging 14592 linhas (qSize=14592); base: 14592 inseridas/reativadas, 0 desativadas, 14592 ativas de 14592; 6s
+[novo_pac_respostas_selecao] extraidas 176479/176479 linhas em 23s
+[novo_pac_respostas_selecao] staging 176479 linhas (qSize=176479); base: 174270 inseridas/reativadas, 0 desativadas, 174270 ativas de 174270; 31s
+[monitoramento_visao_geral] extraidas 67674/67674 linhas em 47s
+[monitoramento_visao_geral] staging 67674 linhas (qSize=67674); base: 67674 inseridas/reativadas, 0 desativadas, 67674 ativas de 67674; 52s
+[monitoramento_saldos_rastreabilidade] extraidas 68036/68036 linhas em 46s
+[monitoramento_saldos_rastreabilidade] staging 68036 linhas (qSize=68036); base: 68036 inseridas/reativadas, 0 desativadas, 68036 ativas de 68036; 51s
+[monitoramento_nao_monitorados] extraidas 25157/25157 linhas em 15s
+[monitoramento_nao_monitorados] staging 25157 linhas (qSize=25157); base: 25157 inseridas/reativadas, 0 desativadas, 25157 ativas de 25157; 17s
+[saldo_competencia_bb] extraidas 66365/66365 linhas em 12s
+[saldo_competencia_bb] staging 66365 linhas (qSize=66365); base: 66365 inseridas/reativadas, 0 desativadas, 66365 ativas de 66365; 15s
+[saldo_competencia_cef] extraidas 44793/44793 linhas em 11s
+[saldo_competencia_cef] staging 44793 linhas (qSize=44793); base: 44793 inseridas/reativadas, 0 desativadas, 44793 ativas de 44793; 13s
+[
+ {
+  "tabela": "instrumentos_investimentos",
+  "qsize": 430884,
+  "staging": 430884,
+  "inseridas": 0,
+  "desativadas": 0,
+  "ativas": 418537,
+  "segundos": 243
+ },
+ {
+  "tabela": "instrumentos_empenhos",
+  "qsize": 473843,
+  "staging": 473843,
+  "inseridas": 473843,
+  "desativadas": 0,
+  "ativas": 473843,
+  "segundos": 86
+ },
+ {
+  "tabela": "instrumentos_cnes_propostas_faf",
+  "qsize": 502356,
+  "staging": 502356,
+  "inseridas": 502356,
+  "desativadas": 0,
+  "ativas": 502356,
+  "segundos": 158
+ },
+ {
+  "tabela": "instrumentos_cnes_detalhado",
+  "qsize": 540273,
+  "staging": 540273,
+  "inseridas": 502356,
+  "desativadas": 0,
+  "ativas": 502356,
+  "segundos": 174
+ },
+ {
+  "tabela": "emendas_instrumentos",
+  "erro": "DiskFull: ERRO:  não foi possível estender o arquivo \"base/3933066/74684155\" com FileFallocate(): No space left on device\nHINT:  Verifique o espaço em disco livre.\nCONTEXT:  COPY emendas_instrumentos, linha 159022\n"
+ },
+ {
+  "tabela": "emendas_indicacao_exercicios_anteriores",
+  "qsize": 253232,
+  "staging": 253232,
+  "inseridas": 253232,
+  "desativadas": 0,
+  "ativas": 253232,
+  "segundos": 149
+ },
+ {
+  "tabela": "emendas_indicacao_exercicio_atual",
+  "qsize": 35040,
+  "staging": 35040,
+  "inseridas": 35040,
+  "desativadas": 0,
+  "ativas": 35040,
+  "segundos": 14
+ },
+ {
+  "tabela": "emendas_cadastro_propostas",
+  "qsize": 35040,
+  "staging": 35040,
+  "inseridas": 35040,
+  "desativadas": 0,
+  "ativas": 35040,
+  "segundos": 16
+ },
+ {
+  "tabela": "emendas_dotacao_exercicio_atual",
+  "qsize": 2501,
+  "staging": 2501,
+  "inseridas": 2501,
+  "desativadas": 0,
+  "ativas": 2501,
+  "segundos": 2
+ },
+ {
+  "tabela": "emendas_sidorc",
+  "qsize": 13072,
+  "staging": 13072,
+  "inseridas": 13072,
+  "desativadas": 0,
+  "ativas": 13072,
+  "segundos": 4
+ },
+ {
+  "tabela": "emendas_autores_comissao",
+  "qsize": 8055,
+  "staging": 8055,
+  "inseridas": 8055,
+  "desativadas": 0,
+  "ativas": 8055,
+  "segundos": 3
+ },
+ {
+  "tabela": "emendas_parlamentares_solicitantes",
+  "qsize": 6167,
+  "staging": 6167,
+  "inseridas": 6167,
+  "desativadas": 0,
+  "ativas": 6167,
+  "segundos": 3
+ },
+ {
+  "tabela": "emendas_impedimentos_tecnicos",
+  "qsize": 44,
+  "staging": 44,
+  "inseridas": 44,
+  "desativadas": 0,
+  "ativas": 44,
+  "segundos": 1
+ },
+ {
+  "tabela": "emendas_cnes",
+  "qsize": 86285,
+  "staging": 86285,
+  "inseridas": 86285,
+  "desativadas": 0,
+  "ativas": 86285,
+  "segundos": 16
+ },
+ {
+  "tabela": "obras_propostas",
+  "qsize": 46814,
+  "staging": 46814,
+  "inseridas": 46813,
+  "desativadas": 0,
+  "ativas": 46813,
+  "segundos": 66
+ },
+ {
+  "tabela": "obras_propostas_sismob_sispag",
+  "qsize": 46913,
+  "staging": 46913,
+  "inseridas": 46913,
+  "desativadas": 0,
+  "ativas": 46913,
+  "segundos": 58
+ },
+ {
+  "tabela": "obras_financeiro",
+  "qsize": 35791,
+  "staging": 35791,
+  "inseridas": 35791,
+  "desativadas": 0,
+  "ativas": 35791,
+  "segundos": 24
+ },
+ {
+  "tabela": "obras_ciclo_datas",
+  "qsize": 46565,
+  "staging": 46565,
+  "inseridas": 46565,
+  "desativadas": 0,
+  "ativas": 46565,
+  "segundos": 49
+ },
+ {
+  "tabela": "obras_monitoramento",
+  "qsize": 134010,
+  "staging": 134010,
+  "inseridas": 134010,
+  "desativadas": 0,
+  "ativas": 134010,
+  "segundos": 40
+ },
+ {
+  "tabela": "obras_cancelados_devolucao",
+  "qsize": 10700,
+  "staging": 10700,
+  "inseridas": 10700,
+  "desativadas": 0,
+  "ativas": 10700,
+  "segundos": 13
+ },
+ {
+  "tabela": "obras_estabelecimentos",
+  "qsize": 13583,
+  "staging": 13583,
+  "inseridas": 13583,
+  "desativadas": 0,
+  "ativas": 13583,
+  "segundos": 7
+ },
+ {
+  "tabela": "obras_sisgru",
+  "qsize": 178863,
+  "staging": 178863,
+  "inseridas": 178640,
+  "desativadas": 0,
+  "ativas": 178640,
+  "segundos": 183
+ },
+ {
+  "tabela": "obras_geolocalizacao",
+  "qsize": 46624,
+  "staging": 46624,
+  "inseridas": 44297,
+  "desativadas": 0,
+  "ativas": 44297,
+  "segundos": 9
+ },
+ {
+  "tabela": "novo_pac_propostas",
+  "qsize": 14592,
+  "staging": 14592,
+  "inseridas": 14592,
+  "desativadas": 0,
+  "ativas": 14592,
+  "segundos": 6
+ },
+ {
+  "tabela": "novo_pac_respostas_selecao",
+  "qsize": 176479,
+  "staging": 176479,
+  "inseridas": 174270,
+  "desativadas": 0,
+  "ativas": 174270,
+  "segundos": 31
+ },
+ {
+  "tabela": "monitoramento_visao_geral",
+  "qsize": 67674,
+  "staging": 67674,
+  "inseridas": 67674,
+  "desativadas": 0,
+  "ativas": 67674,
+  "segundos": 52
+ },
+ {
+  "tabela": "monitoramento_saldos_rastreabilidade",
+  "qsize": 68036,
+  "staging": 68036,
+  "inseridas": 68036,
+  "desativadas": 0,
+  "ativas": 68036,
+  "segundos": 51
+ },
+ {
+  "tabela": "monitoramento_nao_monitorados",
+  "qsize": 25157,
+  "staging": 25157,
+  "inseridas": 25157,
+  "desativadas": 0,
+  "ativas": 25157,
+  "segundos": 17
+ },
+ {
+  "tabela": "saldo_competencia_bb",
+  "qsize": 66365,
+  "staging": 66365,
+  "inseridas": 66365,
+  "desativadas": 0,
+  "ativas": 66365,
+  "segundos": 15
+ },
+ {
+  "tabela": "saldo_competencia_cef",
+  "qsize": 44793,
+  "staging": 44793,
+  "inseridas": 44793,
+  "desativadas": 0,
+  "ativas": 44793,
+  "segundos": 13
+ }
+]
+total 1833s; erros: 1
