@@ -105,7 +105,7 @@ Loader Python (websocket-client + requests) usando a receita acima: abre o app, 
 
 ## Passo 2 — prova de carga (2026-10-23)
 
-- Script: `scripts/carga_tabela.py <appId> <objectId> <tabela>` (Engine API anônima → objeto de sessão sem calc cond → `GetHyperCubeData` paginado → `COPY`). Cria `stg_paineis_fns` se não existir e uma tabela **nova** (falha se já existir; não apaga nada). Credenciais: `FAF_DB_*` de `D:\ProjetosSandro\transfere_pro\APIS\transferencias_fundo_a_fundo\.env` (transferepro @ localhost:5433).
+- Script: `scripts/carga_tabela.py <appId> <objectId> <tabela>` (Engine API anônima → objeto de sessão sem calc cond → `GetHyperCubeData` paginado → `COPY`). Cria `stg_paineis_fns` se não existir e uma tabela **nova** (falha se já existir; não apaga nada). Credenciais: `FNS_DB_*` de `D:\ProjetosSandro\transfere_pro\APIS\transferencias_fundo_a_fundo\.env` (transferepro @ localhost:5433).
 - Criado: schema `stg_paineis_fns` + `stg_paineis_fns.instrumentos_investimentos` (18 colunas snake_case: `vl_*` numeric, `data_portaria` date, resto text; + `dt_carga`). Nenhum outro schema tocado.
 - Resultado: **430.879 linhas** (qSize 430.880; a única ausente é uma linha-artefato só com IBGE 260545). Extração ~205–245 s (777 páginas), COPY ~10 s.
 - Validação vs `Sum()` do Qlik: vl_proposta 244.569.567.910,23 · vl_empenhado 229.251.978.870,13 · vl_pago 218.136.121.529,33 — **iguais**. Linha de amostra (proposta 00161822000126005) idêntica ao painel.
@@ -133,7 +133,7 @@ Loader Python (websocket-client + requests) usando a receita acima: abre o app, 
 
 - Tablespace `ts_faf` (já existente, `D:\pgdata_faf`). Movidas para ele, uma a uma (menor → maior), as **58 tabelas criadas por esta carga** (29 em `stg_paineis_fns`, 29 em `base_fns`) e seus índices. **Não movidas** (pré-existentes do projeto Consulta FNS): `base_fns.tab_proposta`, `controle_carga`, `controle_carga_dia`.
 - C: livre: 4,74 GB antes → 6,22 GB depois da mudança → 6,4 GB depois da carga de emendas_instrumentos.
-- `carga_tabela.py`: a conexão usa `default_tablespace` e `temp_tablespaces` = `ts_faf` (configurável por `FAF_DB_TABLESPACE`, variável de ambiente ou .env) → tabelas, PKs e temporários de sort/hash vão para o D:.
+- `carga_tabela.py`: a conexão usa `default_tablespace` e `temp_tablespaces` = `ts_faf` (configurável por `FNS_DB_TABLESPACE`, variável de ambiente ou .env) → tabelas, PKs e temporários de sort/hash vão para o D:.
 - `emendas_instrumentos` recarregada: staging 326.774 = qSize, base 326.774 ativas, tabela + PK em `ts_faf`. Somas staging = base = Qlik: instrumento_r 159.804.356.794,70 · empenhado_r 159.445.402.762,47 · pago_r 149.652.845.547,76. Tempo 334 s.
 - Agora 30/30 tabelas do escopo carregadas.
 
@@ -141,5 +141,11 @@ Loader Python (websocket-client + requests) usando a receita acima: abre o app, 
 
 - Ponto de entrada: `scripts/executar_carga.ps1` (Windows) / `scripts/executar_carga.sh` (Linux) → `scripts/carga_todas.py` (30 tabelas). Log datado em `logs/execucao_AAAAMMDD_HHMMSS.txt`, limpeza de logs > 90 dias, trava no banco (`pg_advisory_lock`; 2ª execução simultânea sai com código 2), saída 1 se alguma tabela falhar. Carga completa com sucesso grava `logs/ultimo_sucesso.txt`; nova execução no mesmo dia se auto-ignora (`--forcar` para recarregar).
 - Windows: tarefa **"FNS - Carga Paineis InvestSUS"**, diária 06:00 + nova tentativa 12:00, registrada com `scripts/agendar_tarefa.ps1 -SomenteLogado` (roda só com o Sandro logado). Para rodar deslogado: PowerShell como Administrador → `D:\ProjetosSandro\transfere_pro\APIS\carga_painel_fns\scripts\agendar_tarefa.ps1` (pede a senha numa janela segura, não grava). A tarefa "FAF - Carga Transferegov" não está registrada nesta máquina.
-- Linux: `scripts/agendar_linux.sh` (systemd timer `fns-paineis-carga`, ou `--cron`) e passo a passo em `docs/AGENDAMENTO_LINUX.md`; `.env.example` e `requirements.txt` na raiz. No Linux o `.env` fica na raiz do projeto e `FAF_DB_TABLESPACE` deve ficar vazio se o tablespace não existir lá.
+- Linux: `scripts/agendar_linux.sh` (systemd timer `fns-paineis-carga`, ou `--cron`) e passo a passo em `docs/AGENDAMENTO_LINUX.md`; `.env.example` e `requirements.txt` na raiz. No Linux o `.env` fica na raiz do projeto e `FNS_DB_TABLESPACE` deve ficar vazio se o tablespace não existir lá.
 - Testes: execução com 2 tabelas pequenas → código 0 e log criado; trava → código 2; cálculo de horários do cron (06:00/12:00 BRT = 09:00/15:00 UTC).
+
+## Passo 7 — configuração só pelo .env do projeto (2026-10-29)
+
+- `scripts/carga_tabela.py` lê **somente** `<projeto>/.env` (não usa mais o `.env` do projeto FAF nem a variável `CARGA_FNS_ENV`). Variáveis obrigatórias: `FNS_DB_HOST`, `FNS_DB_PORT`, `FNS_DB_NOME`, `FNS_DB_USUARIO`, `FNS_DB_SENHA` e `FNS_DB_TABLESPACE` (esta pode ser vazia = tablespace padrão). Sem o arquivo ou com variável faltando, a carga para com mensagem listando o que falta (código 1).
+- `.env.example` atualizado; `.gitignore` criado (`.env`, `.venv/`, `__pycache__/`, `logs/`, `raw/`).
+- Passo 6 e anteriores: onde diz "credenciais do .env do projeto FAF", vale agora o `.env` do próprio projeto.

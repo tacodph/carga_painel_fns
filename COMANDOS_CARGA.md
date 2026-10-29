@@ -2,7 +2,7 @@
 
 Pasta do projeto: `D:\ProjetosSandro\transfere_pro\APIS\carga_painel_fns`
 
-A carga lê 30 tabelas dos painéis do Qlik e grava em `stg_paineis_fns` (recarga completa). Depois faz o merge em `base_fns` (linhas novas são inseridas e as que sumiram da origem ficam com `fl_ativo = false`). A carga completa leva cerca de 35 a 40 minutos. Credenciais: variáveis `FAF_DB_*` do `.env` do projeto FAF (`D:\ProjetosSandro\transfere_pro\APIS\transferencias_fundo_a_fundo\.env`).
+A carga lê 30 tabelas dos painéis do Qlik e grava em `stg_paineis_fns` (recarga completa). Depois faz o merge em `base_fns` (linhas novas são inseridas e as que sumiram da origem ficam com `fl_ativo = false`). A carga completa leva cerca de 35 a 40 minutos. Configuração: **somente** o arquivo `.env` na raiz deste projeto (modelo em `.env.example`), com `FNS_DB_HOST`, `FNS_DB_PORT`, `FNS_DB_NOME`, `FNS_DB_USUARIO`, `FNS_DB_SENHA` e `FNS_DB_TABLESPACE` (`ts_faf` nesta máquina; pode ficar vazio, mas a linha precisa existir). Sem o `.env`, ou com variável faltando, a carga para com uma mensagem dizendo o que falta. O `.env` está no `.gitignore`.
 
 Códigos de saída: **0** sucesso ou ignorada, **1** erro em alguma tabela, **2** já existe carga em execução.
 

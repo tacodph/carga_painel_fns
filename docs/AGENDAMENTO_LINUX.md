@@ -42,15 +42,15 @@ chmod 600 .env
 nano .env
 ```
 
-Preencha `FAF_DB_HOST`, `FAF_DB_PORT`, `FAF_DB_NOME`, `FAF_DB_USUARIO` e `FAF_DB_SENHA`.
+Preencha `FNS_DB_HOST`, `FNS_DB_PORT`, `FNS_DB_NOME`, `FNS_DB_USUARIO` e `FNS_DB_SENHA`.
 
-**`FAF_DB_TABLESPACE`**: deixe **vazio**, a menos que o tablespace já exista nesse PostgreSQL. O `ts_faf` só existe na máquina Windows (`D:\pgdata_faf`). Com o campo vazio, as tabelas vão para o tablespace padrão. Para conferir:
+**`FNS_DB_TABLESPACE`**: deixe **vazio**, a menos que o tablespace já exista nesse PostgreSQL. O `ts_faf` só existe na máquina Windows (`D:\pgdata_faf`). Com o campo vazio, as tabelas vão para o tablespace padrão. Para conferir:
 
 ```bash
 psql -h HOST -p PORTA -U USUARIO -d transferepro -c "select spcname, pg_tablespace_location(oid) from pg_tablespace"
 ```
 
-O script lê, nesta ordem: a variável `CARGA_FNS_ENV` (caminho de um `.env`), depois `<projeto>/.env`.
+O código lê **somente** `<projeto>/.env`. Todas as 6 linhas do `.env.example` precisam existir; só `FNS_DB_TABLESPACE` pode ficar vazia. Se faltar algo, a carga para e lista as variáveis que faltam.
 
 ## 5. Teste manual
 

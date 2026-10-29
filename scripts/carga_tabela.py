@@ -10,10 +10,9 @@ import psycopg2
 from probe import connect, rpc
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-# .env: CARGA_FNS_ENV > <raiz>/.env (ex.: Linux) > .env do projeto FAF nesta maquina
-ENV = os.environ.get("CARGA_FNS_ENV") or (
-    os.path.join(RAIZ, ".env") if os.path.exists(os.path.join(RAIZ, ".env"))
-    else r"D:\ProjetosSandro\transfere_pro\APIS\transferencias_fundo_a_fundo\.env")
+ENV = os.path.join(RAIZ, ".env")  # so o .env do proprio projeto (modelo: .env.example)
+# FNS_DB_TABLESPACE precisa existir no .env, mas pode ficar vazio (= tablespace padrao do servidor)
+OBRIGATORIAS = ["FNS_DB_HOST", "FNS_DB_PORT", "FNS_DB_NOME", "FNS_DB_USUARIO", "FNS_DB_SENHA", "FNS_DB_TABLESPACE"]
 SCHEMA = "stg_paineis_fns"
 BASE = "base_fns"
 NUM_HINT = re.compile(r"^(vl|valor|saldo|soma|qtd|quantidade|percentual|populacao|gru_valor)|_r$|(^|_)(valor|saldo)(_|$)")
@@ -22,22 +21,26 @@ COMPETENCIA = re.compile(r"COMPETENCIA SALDO (\d\d/\d{4})", re.I)  # titulo muda
 
 
 def env():
+    if not os.path.exists(ENV):
+        sys.exit(f"ERRO: arquivo {ENV} nao encontrado. Copie .env.example para .env e preencha.")
     d = {}
-    for line in open(ENV, encoding="utf-8"):
+    for line in open(ENV, encoding="utf-8-sig"):
         if "=" in line and not line.lstrip().startswith("#"):
             k, v = line.strip().split("=", 1)
-            d[k] = v
+            d[k.strip()] = v.strip().strip('"').strip("'")
+    faltam = [k for k in OBRIGATORIAS if k not in d] + [k for k in OBRIGATORIAS[:-1] if k in d and not d[k]]
+    if faltam:
+        sys.exit(f"ERRO: no arquivo {ENV} faltam (ou estao vazias) as variaveis: {', '.join(faltam)}")
     return d
 
 
 def conecta():
     e = env()
-    # tabelas, indices e temporarios (sort/hash) no D:, o C: do Postgres esta cheio
-    # vazio = tablespace padrao do servidor (ex.: Linux sem ts_faf)
-    ts = os.environ.get("FAF_DB_TABLESPACE", e.get("FAF_DB_TABLESPACE", "ts_faf"))
+    # tabelas, indices e temporarios (sort/hash) no tablespace do .env (ts_faf = D: nesta maquina); vazio = padrao
+    ts = e["FNS_DB_TABLESPACE"]
     opcoes = f"-c default_tablespace={ts} -c temp_tablespaces={ts}" if ts else ""
-    return psycopg2.connect(host=e["FAF_DB_HOST"], port=e["FAF_DB_PORT"], dbname=e["FAF_DB_NOME"],
-                            user=e["FAF_DB_USUARIO"], password=e["FAF_DB_SENHA"], options=opcoes)
+    return psycopg2.connect(host=e["FNS_DB_HOST"], port=e["FNS_DB_PORT"], dbname=e["FNS_DB_NOME"],
+                            user=e["FNS_DB_USUARIO"], password=e["FNS_DB_SENHA"], options=opcoes)
 
 
 def snake(s):
