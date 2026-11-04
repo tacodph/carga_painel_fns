@@ -9,8 +9,17 @@ RAW = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 
 def connect(app):
     s = requests.Session(); s.headers["User-Agent"] = UA; s.verify = False
     s.get(f"https://{H}/extensions/CGIN_InvestsusPaineis/CGIN_InvestsusPaineis.html")
-    tok = s.get(f"https://{H}/qps/csrftoken?xrfkey=abcdefghijklmnop",
-                headers={"X-Qlik-Xrfkey": "abcdefghijklmnop"}).headers["qlik-csrf-token"]
+    resposta = s.get(f"https://{H}/qps/csrftoken?xrfkey=abcdefghijklmnop",
+                     headers={"X-Qlik-Xrfkey": "abcdefghijklmnop"})
+    resposta.raise_for_status()
+    tok = resposta.headers.get("qlik-csrf-token")
+    if not tok:
+        raise RuntimeError(
+            "Qlik nao retornou o cabecalho qlik-csrf-token "
+            f"(HTTP {resposta.status_code}, Content-Type: "
+            f"{resposta.headers.get('Content-Type', 'ausente')}, "
+            f"URL final: {resposta.url}). Verifique o acesso ao servico Qlik."
+        )
     ck = "; ".join(f"{k}={v}" for k, v in s.cookies.get_dict().items())
     ws = websocket.create_connection(f"wss://{H}/app/{app}?qlik-csrf-token={tok}",
         sslopt={"cert_reqs": ssl.CERT_NONE}, header=[f"User-Agent: {UA}", f"Cookie: {ck}"],

@@ -6,34 +6,31 @@ A carga lê 30 tabelas dos painéis do Qlik e grava em `stg_paineis_fns` (recarg
 
 Códigos de saída: **0** sucesso ou ignorada, **1** erro em alguma tabela, **2** já existe carga em execução.
 
-## Rodar a carga manualmente
+## Carga completa (Windows)
 
-No **Prompt de Comando (cmd)**, ou com duplo clique em `carga.bat`:
+Abra o **Prompt de Comando (cmd)** e rode:
 
 ```bat
 cd /d D:\ProjetosSandro\transfere_pro\APIS\carga_painel_fns
 carga.bat
-carga.bat --forcar
-carga.bat emendas_instrumentos obras_propostas
 ```
 
-- `carga.bat` sozinho carrega todas as tabelas. Se a carga completa de hoje já deu certo, ele se ignora.
-- `--forcar` recarrega todas mesmo que a carga já tenha rodado hoje.
-- Passando nomes de tabelas, carrega só as informadas.
+Esse comando carrega todas as tabelas. Se a carga de hoje já tiver sido concluída com sucesso, ela será ignorada.
 
-No **PowerShell**:
-
-```powershell
-cd D:\ProjetosSandro\transfere_pro\APIS\carga_painel_fns
-.\carga.bat
-.\scripts\executar_carga.ps1 --forcar
-.\scripts\executar_carga.ps1 emendas_instrumentos
-```
-
-Teste rápido (2 tabelas pequenas, poucos segundos):
+Para executar novamente mesmo que a carga de hoje já tenha dado certo:
 
 ```bat
-carga.bat emendas_impedimentos_tecnicos emendas_dotacao_exercicio_atual
+carga.bat --forcar
+```
+
+Também é possível iniciar a carga completa com duplo clique em `carga.bat`.
+
+## Outros comandos
+
+Para carregar somente tabelas específicas, rode no diretório do projeto:
+
+```bat
+carga.bat emendas_instrumentos obras_propostas
 ```
 
 Nomes das tabelas: lista `TABELAS` em `scripts\carga_todas.py`.
@@ -96,4 +93,23 @@ Depois de uma carga, atualize a árvore do pgAdmin (botão direito → Refresh) 
 
 ## Linux
 
-Ver `docs\AGENDAMENTO_LINUX.md` (`scripts/executar_carga.sh` e `scripts/agendar_linux.sh`).
+No terminal do Linux, dentro da pasta do projeto:
+
+```bash
+cd /opt/carga_fns
+./scripts/executar_carga.sh
+```
+
+Esse comando carrega todas as tabelas. Se a carga de hoje já tiver sido concluída com sucesso, ela será ignorada. Para forçar uma nova carga completa:
+
+```bash
+./scripts/executar_carga.sh --forcar
+```
+
+Na primeira execução, se necessário, dê permissão ao script:
+
+```bash
+chmod +x scripts/executar_carga.sh
+```
+
+Veja [docs/AGENDAMENTO_LINUX.md](docs/AGENDAMENTO_LINUX.md) para instalação, configuração e agendamento.
