@@ -1,17 +1,38 @@
 """Mapeia apps/objetos dos paineis InvestSUS via Qlik Engine API anonima."""
-import json, ssl, sys, re, glob, os, requests, websocket, urllib3
+import json, ssl, sys, re, glob, os, time, requests, websocket, urllib3
 urllib3.disable_warnings()
 H = "investsuspaineis.saude.gov.br"
 UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0"
 TABLE_TYPES = {"table", "sn-table", "pivot-table", "sn-pivot-table", "TableBox", "straight-table"}
 RAW = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "raw")
 
+PAGE = f"https://{H}/extensions/CGIN_InvestsusPaineis/CGIN_InvestsusPaineis.html"
+BROWSER_HEADERS = {
+    "User-Agent": UA,
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
+    "Referer": PAGE,
+    "Origin": f"https://{H}",
+}
+
+def _csrf(tentativas=4):
+    """Obtem sessao + token CSRF; refaz a sessao com backoff em 403/429/5xx."""
+    for i in range(tentativas):
+        s = requests.Session(); s.headers.update(BROWSER_HEADERS); s.verify = False
+        s.get(PAGE, timeout=60)
+        time.sleep(1 + i)  # pausa curta: evita parecer robo
+        r = s.get(f"https://{H}/qps/csrftoken?xrfkey=abcdefghijklmnop",
+                  headers={"X-Qlik-Xrfkey": "abcdefghijklmnop"}, timeout=60)
+        if r.status_code in (403, 429) or r.status_code >= 500:
+            if i < tentativas - 1:
+                time.sleep(5 * 2 ** i); continue
+            raise RuntimeError(f"HTTP {r.status_code} em {r.url} | Server: {r.headers.get('Server')} | "
+                               f"corpo: {r.text[:300]!r} (provavel bloqueio de WAF/IP deste servidor)")
+        r.raise_for_status()
+        return s, r
+
 def connect(app):
-    s = requests.Session(); s.headers["User-Agent"] = UA; s.verify = False
-    s.get(f"https://{H}/extensions/CGIN_InvestsusPaineis/CGIN_InvestsusPaineis.html")
-    resposta = s.get(f"https://{H}/qps/csrftoken?xrfkey=abcdefghijklmnop",
-                     headers={"X-Qlik-Xrfkey": "abcdefghijklmnop"})
-    resposta.raise_for_status()
+    s, resposta = _csrf()
     tok = resposta.headers.get("qlik-csrf-token")
     if not tok:
         raise RuntimeError(

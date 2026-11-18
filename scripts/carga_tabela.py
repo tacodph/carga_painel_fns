@@ -6,11 +6,16 @@ base_fns nao tem chave natural: hash_linha = md5 da linha; linha que some da ori
 """
 import csv, io, os, re, sys, time, unicodedata
 from datetime import date, timedelta
+from openpyxl import Workbook
+from openpyxl.cell import WriteOnlyCell
+from openpyxl.cell.cell import ILLEGAL_CHARACTERS_RE
 import psycopg2
 from probe import connect, rpc
 
 RAIZ = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-ENV = os.path.join(RAIZ, ".env")  # so o .env do proprio projeto (modelo: .env.example)
+# .env do proprio projeto (modelo: .env.example); FNS_ENV_FILE escolhe outro destino, ex.: .env.forge
+NOME_ENV = os.environ.get("FNS_ENV_FILE", ".env")
+ENV = os.path.join(RAIZ, NOME_ENV)
 # FNS_DB_TABLESPACE precisa existir no .env, mas pode ficar vazio (= tablespace padrao do servidor)
 OBRIGATORIAS = ["FNS_DB_HOST", "FNS_DB_PORT", "FNS_DB_NOME", "FNS_DB_USUARIO", "FNS_DB_SENHA", "FNS_DB_TABLESPACE"]
 SCHEMA = "stg_paineis_fns"
@@ -90,6 +95,46 @@ def valor(cell, t):
     return cell.get("qText")
 
 
+def salva_excel(caminho, tabela, titulos, linhas, tipos, extras):
+    limite_linhas = 1_048_576
+    if len(titulos) + len(extras) > 16_384:
+        raise ValueError(f"{tabela}: excede o limite de colunas do Excel")
+
+    wb = Workbook(write_only=True)
+    linhas_por_aba = limite_linhas - 1
+    total_abas = max(1, (len(linhas) + linhas_por_aba - 1) // linhas_por_aba)
+    cabecalho = titulos + list(extras)
+
+    def texto_seguro(ws, texto):
+        # o Excel recusa caracteres de controle (ex.: \x02); o banco guarda o texto original
+        celula = WriteOnlyCell(ws, value="" if texto is None else ILLEGAL_CHARACTERS_RE.sub("", str(texto)))
+        celula.data_type = "s"
+        return celula
+
+    for numero_aba in range(total_abas):
+        inicio = numero_aba * linhas_por_aba
+        fim = min(inicio + linhas_por_aba, len(linhas))
+        sufixo = f"_{numero_aba + 1:04d}" if total_abas > 1 else ""
+        ws = wb.create_sheet(f"{tabela[:31 - len(sufixo)]}{sufixo}")
+        ws.append([texto_seguro(ws, titulo) for titulo in cabecalho])
+        for linha in linhas[inicio:fim]:
+            valores = []
+            for celula, tipo_coluna in zip(linha, tipos):
+                convertido = valor(celula, tipo_coluna)
+                if convertido is None:
+                    valores.append(None)
+                elif tipo_coluna == "numeric":
+                    valores.append(float(convertido))
+                elif tipo_coluna == "date":
+                    valores.append(date.fromisoformat(convertido))
+                else:
+                    valores.append(texto_seguro(ws, convertido))
+            valores.extend(texto_seguro(ws, extra) for extra in extras.values())
+            ws.append(valores)
+
+    wb.save(caminho)
+
+
 def sessao(ws, h, hc):
     return rpc(ws, "CreateSessionObject", h, {"qProp": {"qInfo": {"qType": "carga"}, "qHyperCubeDef": hc}})["qReturn"]["qHandle"]
 
@@ -129,7 +174,7 @@ def extrai(app, oid):
     return titulos, medidas, cy, linhas
 
 
-def main(app, oid, tabela):
+def main(app, oid, tabela, export_dir=None):
     t0 = time.time()
     titulos, medidas, cy, linhas = extrai(app, oid)
     cols, extras = nomes_colunas(titulos)
@@ -172,10 +217,20 @@ def main(app, oid, tabela):
         cur.execute(f"SELECT count(*) FILTER (WHERE fl_ativo), count(*) FROM {BASE}.{tabela}")
         ativas, total = cur.fetchone()
     con.close()
+    arquivo = None
+    if export_dir:
+        os.makedirs(export_dir, exist_ok=True)
+        arquivo = os.path.join(export_dir, f"{tabela}.xlsx")
+        salva_excel(arquivo, tabela, titulos, linhas, tipos, extras)
     print(f"[{tabela}] staging {n} linhas (qSize={cy}); base: {afetadas} inseridas/reativadas, "
           f"{desativadas} desativadas, {ativas} ativas de {total}; {time.time() - t0:.0f}s")
-    return {"tabela": tabela, "qsize": cy, "staging": n, "inseridas": afetadas, "desativadas": desativadas,
-            "ativas": ativas, "segundos": round(time.time() - t0)}
+    if arquivo:
+        print(f"[{tabela}] arquivo Excel: {arquivo}")
+    resultado = {"tabela": tabela, "qsize": cy, "staging": n, "inseridas": afetadas, "desativadas": desativadas,
+                 "ativas": ativas, "segundos": round(time.time() - t0)}
+    if arquivo:
+        resultado["arquivo"] = arquivo
+    return resultado
 
 
 if __name__ == "__main__":

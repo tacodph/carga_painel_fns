@@ -6,12 +6,66 @@ Carga completa com sucesso grava logs/ultimo_sucesso.txt; outra execucao no mesm
 (e o que torna segura a nova tentativa agendada das 12:00). --forcar ignora essa marca.
 Fora do escopo (ver mapeamento_paineis.md): painel FAF e tabelas de Ordens Bancarias.
 """
-import json, os, sys, time, traceback
-from datetime import date
-from carga_tabela import RAIZ, conecta, main
+import json, os, re, sys, time, traceback, unicodedata
+from datetime import date, datetime
+from carga_tabela import RAIZ, NOME_ENV, conecta, main
 
-TRAVA = 762731  # pg_advisory_lock: impede duas cargas ao mesmo tempo
-MARCA = os.path.join(RAIZ, "logs", "ultimo_sucesso.txt")
+SP = "transfere_pro_transferegov"
+ORIGEM_PARLAMENTAR = "painel_fns"
+# (tabela em base_fns, coluna com o nome); colunas "solicitante" trazem varios nomes separados por " / "
+FONTES_PARLAMENTAR = [
+    ("emendas_instrumentos", "parlamentar"),
+    ("emendas_instrumentos", "parlamentar_solicitante_a_partir_de_2025"),
+    ("emendas_cadastro_propostas", "parlamentar"),
+    ("emendas_indicacao_exercicio_atual", "parlamentar"),
+    ("emendas_parlamentares_solicitantes", "parlamentar_solicitante"),
+    ("emendas_autores_comissao", "parlamentar_participante_da_indicacao_de_comissao"),
+]
+
+
+def normaliza(nome):
+    s = unicodedata.normalize("NFKD", nome).encode("ascii", "ignore").decode().upper()
+    return " ".join(re.sub(r"[^A-Z0-9]+", " ", s).split())
+
+
+def tipo_parlamentar(n):
+    if n == "RELATOR GERAL": return n
+    if n.startswith("BANCADA"): return "BANCADA"
+    if n.startswith(("COM ", "COMISSAO")): return "COMISSAO"
+    return "INDIVIDUAL"
+
+
+def atualiza_parlamentares(con):
+    """Cadastra em tab_parlamentares/_alias os nomes do painel ainda nao cadastrados (sem commit; quem chama decide).
+    Novos entram com fl_revisar=true: podem ser grafia nova de alguem ja cadastrado e precisam ser mesclados a mao."""
+    cur = con.cursor()
+    cur.execute("SELECT to_regclass(%s) IS NOT NULL AND to_regclass(%s) IS NOT NULL",
+                (f"{SP}.tab_parlamentares", f"{SP}.tab_parlamentares_alias"))
+    if not cur.fetchone()[0]:
+        print(f"[parlamentares] tabelas {SP}.tab_parlamentares* nao existem neste banco; ignorado")
+        return {"tabela": "parlamentares", "novos": 0, "ignorado": True}
+    nomes = {}
+    for tab, col in FONTES_PARLAMENTAR:
+        cur.execute(f"SELECT DISTINCT {col} FROM base_fns.{tab} WHERE fl_ativo AND {col} IS NOT NULL ORDER BY 1")
+        for (v,) in cur.fetchall():
+            for parte in v.split("/"):
+                if (n := normaliza(parte)) and n != "NAO SE APLICA":
+                    nomes.setdefault(n, parte.strip())
+    cur.execute(f"SELECT nome_normalizado FROM {SP}.tab_parlamentares_alias "
+                f"UNION SELECT nome_normalizado FROM {SP}.tab_parlamentares")
+    existentes = {r[0] for r in cur.fetchall()}
+    novos = {n: o for n, o in nomes.items() if n not in existentes}
+    for n, o in sorted(novos.items()):
+        cur.execute(f"INSERT INTO {SP}.tab_parlamentares (nome_parlamentar, nome_normalizado, tipo_parlamentar, fl_revisar) "
+                    f"VALUES (%s, %s, %s, true) RETURNING id_parlamentar", (o, n, tipo_parlamentar(n)))
+        cur.execute(f"INSERT INTO {SP}.tab_parlamentares_alias (nome_normalizado, nome_original, id_parlamentar, origem) "
+                    f"VALUES (%s, %s, %s, %s)", (n, o, cur.fetchone()[0], ORIGEM_PARLAMENTAR))
+    print(f"[parlamentares] {len(nomes)} nomes no painel; {len(novos)} novos cadastrados (fl_revisar=true)")
+    return {"tabela": "parlamentares", "nomes_painel": len(nomes), "novos": len(novos)}
+
+TRAVA = 762731  # pg_advisory_lock: impede duas cargas ao mesmo tempo (por banco)
+# marca por destino: .env -> ultimo_sucesso.txt; .env.forge -> ultimo_sucesso.env.forge.txt
+MARCA = os.path.join(RAIZ, "logs", "ultimo_sucesso.txt" if NOME_ENV == ".env" else f"ultimo_sucesso{NOME_ENV}.txt")
 
 INSTRUMENTOS = "0ba8c451-0b87-4657-ae70-ee6dcf11aec1"
 EMENDAS = "585aca8d-2714-487d-a08e-34150047e7dd"
@@ -67,14 +121,24 @@ if __name__ == "__main__":
         sys.exit(2)
     resultado = []
     t0 = time.time()
+    export_dir = None
+    if os.name == "nt" and os.environ.get("FNS_EXPORTAR_ARQUIVOS") == "1":
+        export_dir = os.path.join(RAIZ, "arquivos", datetime.now().strftime("%Y%m%d_%H%M%S"))
     for app, oid, tabela in TABELAS:
         if escolhidas and tabela not in escolhidas:
             continue
         try:
-            resultado.append(main(app, oid, tabela))
+            resultado.append(main(app, oid, tabela, export_dir=export_dir))
         except Exception as e:
             traceback.print_exc()
             resultado.append({"tabela": tabela, "erro": f"{type(e).__name__}: {e}"[:300]})
+    try:  # nomes de parlamentares novos; uma transacao so, falhou = nada muda
+        con = conecta()
+        resultado.append(atualiza_parlamentares(con))
+        con.commit(); con.close()
+    except Exception as e:
+        traceback.print_exc()
+        resultado.append({"tabela": "parlamentares", "erro": f"{type(e).__name__}: {e}"[:300]})
     erros = sum("erro" in r for r in resultado)
     print(json.dumps(resultado, ensure_ascii=False, indent=1))
     print(f"total {time.time() - t0:.0f}s; tabelas: {len(resultado)}; erros: {erros}")

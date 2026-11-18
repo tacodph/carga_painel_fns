@@ -25,6 +25,13 @@ carga.bat --forcar
 
 Também é possível iniciar a carga completa com duplo clique em `carga.bat`.
 
+Em cada execução pelo Windows, os dados das tabelas carregadas também são salvos em arquivos Excel em `arquivos\AAAAMMDD_HHMMSS`, uma subpasta por execução.
+Após atualizar o projeto, instale a nova dependência no ambiente usado pela carga:
+
+```bat
+.venv\Scripts\python.exe -m pip install -r requirements.txt
+```
+
 ## Outros comandos
 
 Para carregar somente tabelas específicas, rode no diretório do projeto:

@@ -23,6 +23,7 @@ $saida = Join-Path $logs ('execucao_{0:yyyyMMdd_HHmmss}.txt' -f (Get-Date))
 
 $env:PYTHONIOENCODING = 'utf-8'
 $env:PYTHONUNBUFFERED = '1'
+$env:FNS_EXPORTAR_ARQUIVOS = '1'
 $ErrorActionPreference = 'Continue'   # avisos em stderr nao viram excecao no PS 5.1
 # log em UTF-8 (o Tee-Object do PS 5.1 grava UTF-16, que aparece com espacos entre as letras)
 & $py -W ignore (Join-Path $raiz 'scripts\carga_todas.py') @args *>&1 |
